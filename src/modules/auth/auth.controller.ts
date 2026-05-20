@@ -1,7 +1,14 @@
-import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Post, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthenticationService } from './auth.service';
-import { SignupBodyDto } from './dto/signup.dto';
+import { LoginBodyDto, SignupBodyDto, SignupQueryDTo } from './dto/signup.dto';
 
+
+
+  @UsePipes(      new ValidationPipe({
+        stopAtFirstError: true,
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      }))
 @Controller()
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
@@ -9,15 +16,13 @@ export class AuthenticationController {
   @Post('auth/signup')
   signup(
     @Body(
-      new ValidationPipe({
-        stopAtFirstError: true,
-        whitelist: true,
-        forbidNonWhitelisted: true,
-      }),
+
     )
     body: SignupBodyDto,
+    @Query()
+    query:SignupQueryDTo
   ): { message: string; data: { userId: number } } {
-    console.log(body);
+    console.log(query,body);
 
     const id: number = this.authenticationService.signup(body);
 
@@ -25,7 +30,12 @@ export class AuthenticationController {
   }
 
   @Post('auth/login')
-  login() {
+  login(
+    @Body() 
+    body:LoginBodyDto
+  ) {
+    console.log(body);
+    
     return { message: 'Done' };
   }
 }
