@@ -4,11 +4,7 @@ import { LoginBodyDto, SignupBodyDto, SignupQueryDTo } from './dto/signup.dto';
 
 
 
-  @UsePipes(      new ValidationPipe({
-        stopAtFirstError: true,
-        whitelist: true,
-        forbidNonWhitelisted: true,
-      }))
+
 @Controller()
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
