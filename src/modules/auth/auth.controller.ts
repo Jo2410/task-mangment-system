@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Query, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Post, Query } from '@nestjs/common';
 import { AuthenticationService } from './auth.service';
 import { LoginBodyDto, SignupBodyDto, SignupQueryDTo } from './dto/signup.dto';
 

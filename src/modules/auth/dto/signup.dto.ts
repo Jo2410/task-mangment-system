@@ -7,7 +7,8 @@ import {
   MinLength,
   ValidateIf,
 } from 'class-validator';
-import { IsMatch } from 'src/common';
+import { IsMatch } from '../../../common';
+
 
 export class LoginBodyDto {
     @IsEmail()

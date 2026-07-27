@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { IUser } from "src/common";
+import { IUser } from "../../common";
+
 
 
 
@@ -16,3 +17,4 @@ export class UserService{
         return [{id:2,email:'sdfs',password:'sfs',username:'ss'}]
     }
 }
+
