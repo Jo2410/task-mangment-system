@@ -14,7 +14,7 @@ export class UserService{
     constructor(){}
 
     allusers():IUser[]{
-        return [{id:2,email:'sdfs',password:'sfs',username:'ss'}]
+        return [{id:2,email:'sdfs',password:'sfs',username:'ssss'}]
     }
 }
 
