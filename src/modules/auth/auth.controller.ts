@@ -7,19 +7,19 @@ export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
   @Post('auth/signup')
-  signup(
-    @Body(new ValidationPipe({ stopAtFirstError: true, whitelist: true }))
+  async signup(
+    @Body()
     body: SignupBodyDto,
-  ): { message: string; data: { userId: number } } {
+  ): Promise<{ message: string }> {
     console.log(body);
 
-    const id: number = this.authenticationService.signup(body);
+    await this.authenticationService.signup(body);
 
-    return { message: 'Done', data: { userId: id } };
+    return { message: "Done" };
   }
 
   @Post('auth/login')
-  login(
+  async login(
     @Body()
     body: LoginBodyDto,
   ) {
