@@ -1,6 +1,13 @@
-import { MongooseModule, Prop, Schema, SchemaFactory, Virtual } from '@nestjs/mongoose';
+import {
+  MongooseModule,
+  Prop,
+  Schema,
+  SchemaFactory,
+  Virtual,
+} from '@nestjs/mongoose';
 import { GenderEnum, ProviderEnum } from '../../common/enum/user.enum';
 import { HydratedDocument } from 'mongoose';
+import { generateHash } from '../../common/utils/security/hash.security';
 
 @Schema({
   strictQuery: true,
@@ -78,14 +85,38 @@ export class User {
   })
   changeCredentialsTime?: Date;
 }
+// Export the User schema to be used in other parts of the application
+// for auth.service.ts constructor(@InjectModel(User.name) private readonly model: Model<UserDocument>);
+export type UserDocument = HydratedDocument<User>;
 
 // Create the Mongoose schema for the User class
 // The schema will be used to define the structure of the User documents in the MongoDB collection
 const userSchema = SchemaFactory.createForClass(User);
-// Export the User schema to be used in other parts of the application
-// for auth.service.ts constructor(@InjectModel(User.name) private readonly model: Model<UserDocument>);
-export type UserDocument = HydratedDocument<User>;
+
+//Hook to hash the password before saving the user document to the database
+// userSchema.pre('save', async function () {
+//   if (this.isModified('password')) {
+//     this.password = await generateHash(this.password);
+//   }
+// });
+// export const UserModel= MongooseModule.forFeature([
+//   {name:User.name, schema:userSchema}
+// ])
+
 // Export the User model to be used in other parts of the application
 // for auth.module.ts
 //registers the User model with NestJS's dependency injection system
-export const UserModel = MongooseModule.forFeature([{name: User.name, schema: userSchema}]);
+
+export const UserModel= MongooseModule.forFeatureAsync([
+  {
+    name: User.name,
+    useFactory: ()=>{
+      userSchema.pre('save',async function(){
+        if (this.isModified('password')) {
+          this.password = await generateHash(this.password);
+        }
+      })
+      return userSchema;
+    }
+  }
+])

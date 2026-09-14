@@ -1,25 +1,26 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { IUser } from '../../common';
-import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from '../../DB/model/user.model';
-import { Model } from 'mongoose';
 import { SignupBodyDto } from './dto/signup.dto';
+import { UserRepository } from '../../DB/repository/user.repository';
+import { generateHash } from '../../common/utils/security/hash.security';
 
 @Injectable()
 export class AuthenticationService {
   private users: IUser[] = [];
-  constructor(
-    @InjectModel(User.name) private readonly model: Model<UserDocument>,
-  ) {}
+  constructor(private readonly userRepository: UserRepository) {}
 
   async signup(data: SignupBodyDto): Promise<string> {
-    const {username, email ,password } = data;
-    const checkUser = await this.model.findOne({ email: data.email});
+    const { username, email, password } = data;
+    const checkUser = await this.userRepository.findOne({ filter: { email } });
     if (checkUser) {
-        throw new ConflictException ("email already exists");
+      throw new ConflictException('email already exists');
     }
-    const [user] = await this.model.create([{ username, email, password }]);
-
+    const [user] = await this.userRepository.create({
+      data:[{ username, email, password}]
+    });
+      if (!user) {
+        throw new BadRequestException('Fail to signup this account please try again later');
+      }
     return 'Done';
   }
 
