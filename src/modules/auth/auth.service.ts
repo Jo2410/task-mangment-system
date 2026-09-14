@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { IUser } from '../../common';
-import { SignupBodyDto } from './dto/signup.dto';
+import { SignupBodyDto } from './dto/auth.dto';
 import { UserRepository } from '../../DB/repository/user.repository';
 import { generateHash } from '../../common/utils/security/hash.security';
 
