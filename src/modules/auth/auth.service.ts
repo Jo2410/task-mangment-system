@@ -3,6 +3,7 @@ import { IUser } from '../../common';
 import { SignupBodyDto } from './dto/auth.dto';
 import { UserRepository } from '../../DB/repository/user.repository';
 import { generateHash } from '../../common/utils/security/hash.security';
+import { emailEvent } from '../../common/utils/email/email.event';
 
 @Injectable()
 export class AuthenticationService {
@@ -21,8 +22,10 @@ export class AuthenticationService {
       if (!user) {
         throw new BadRequestException('Fail to signup this account please try again later');
       }
+
+      emailEvent.emit('confirmEmail', {to:email, otp:"1234"})
     return 'Done';
   }
 
-  login() {}
+
 }

@@ -5,7 +5,7 @@ import { Model } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
 
 @Injectable()
-export class UserRepository extends DatabaseRepository<TDocument> {
+export class UserRepository extends DatabaseRepository<User> {
     constructor(@InjectModel(User.name) protected readonly model: Model<TDocument>) {
         super(model);
     }
