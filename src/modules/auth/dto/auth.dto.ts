@@ -4,15 +4,23 @@ import {
   IsString,
   IsStrongPassword,
   Length,
+  Matches,
   MinLength,
   ValidateIf,
 } from 'class-validator';
 import { IsMatch } from '../../../common';
 
-
-export class LoginBodyDto {
-    @IsEmail()
+export class ResendConfirmEmailDto {
+      @IsEmail()
   email!: string;
+}
+
+export class ConfirmEmailDto extends ResendConfirmEmailDto{
+  @Matches(/^\d{6}$/)
+  code!:string
+}
+
+export class LoginBodyDto extends ResendConfirmEmailDto {
 
   @IsStrongPassword()
   password!: string;

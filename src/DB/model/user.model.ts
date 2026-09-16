@@ -8,6 +8,7 @@ import {
 import { GenderEnum, ProviderEnum } from '../../common/enum/user.enum';
 import { HydratedDocument } from 'mongoose';
 import { generateHash } from '../../common/utils/security/hash.security';
+import { OtpDocument } from './otp.model';
 
 @Schema({
   strictQuery: true,
@@ -53,7 +54,7 @@ export class User {
   email!: string;
 
   @Prop({ type: Date, required: false })
-  confirmEmail?: Date;
+  confirmedAt?: Date;
 
   @Prop({
     type: String,
@@ -84,6 +85,9 @@ export class User {
     required: false,
   })
   changeCredentialsTime?: Date;
+
+  @Virtual()
+  otp!:OtpDocument[]
 }
 // Export the User schema to be used in other parts of the application
 // for auth.service.ts constructor(@InjectModel(User.name) private readonly model: Model<UserDocument>);
@@ -92,6 +96,12 @@ export type UserDocument = HydratedDocument<User>;
 // Create the Mongoose schema for the User class
 // The schema will be used to define the structure of the User documents in the MongoDB collection
 const userSchema = SchemaFactory.createForClass(User);
+
+userSchema.virtual('otp',{
+  localField: "_id",
+  foreignField:'createdBy',
+  ref:'Otp',
+})
 
 //Hook to hash the password before saving the user document to the database
 // userSchema.pre('save', async function () {
@@ -102,6 +112,9 @@ const userSchema = SchemaFactory.createForClass(User);
 // export const UserModel= MongooseModule.forFeature([
 //   {name:User.name, schema:userSchema}
 // ])
+
+
+
 
 // Export the User model to be used in other parts of the application
 // for auth.module.ts
