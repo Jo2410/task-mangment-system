@@ -7,16 +7,19 @@ import {
 import { IUser } from '../../common';
 import {
   ConfirmEmailDto,
+  LoginBodyDto,
   ResendConfirmEmailDto,
   SignupBodyDto,
 } from './dto/auth.dto';
 import { UserRepository } from '../../DB/repository/user.repository';
-import { emailEvent } from '../../common/utils/email/email.event';
 import { OtpRepository } from '../../DB/repository/otp.repository';
 import { OtpEnum } from '../../common/enum/otp.enum';
 import { Types } from 'mongoose';
 import { createNumericalOtp } from '../../common/utils/otp';
 import { SecurityService } from '../../common/services/security.service';
+import { ProviderEnum } from '../../common/enum/user.enum';
+import { sign } from 'jsonwebtoken';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthenticationService {
@@ -25,6 +28,7 @@ export class AuthenticationService {
     private readonly userRepository: UserRepository,
     private readonly otpRepository: OtpRepository,
     private readonly securityService: SecurityService,
+    private readonly jwtService: JwtService,
   ) {}
 
   private async createConfirmEmailOtp(userId: Types.ObjectId) {
@@ -97,16 +101,47 @@ export class AuthenticationService {
     }
 
     const isMatch =
-    user.otp?.length &&
-    (await this.securityService.compareHash(code, user.otp[0].code));
+      user.otp?.length &&
+      (await this.securityService.compareHash(code, user.otp[0].code));
 
-  if (!isMatch) {
-    throw new BadRequestException('In-valid OTP');
+    if (!isMatch) {
+      throw new BadRequestException('In-valid OTP');
+    }
+
+    user.confirmedAt = new Date();
+    await user.save();
+    await this.otpRepository.deleteOne({ filter: { _id: user.otp[0]._id } });
+    return 'Done';
   }
 
-  user.confirmedAt = new Date();
-  await user.save();
-  await this.otpRepository.deleteOne({filter:{_id:user.otp[0]._id}})
-    return 'Done';
+  async login(
+    data: LoginBodyDto,
+  ): Promise<{ access_token: string; refresh_token: string }> {
+    const { email, password } = data;
+    const user = await this.userRepository.findOne({
+      filter: {
+        email,
+        confirmedAt: { $exists: true },
+        provider: ProviderEnum.SYSTEM,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException('Fail to find matching account ');
+    }
+    if (!(await this.securityService.compareHash(password, user.password))) {
+      throw new NotFoundException('Fail to find matching account ');
+    }
+    const credentials = {
+      access_token: await this.jwtService.signAsync(
+        { sub: user._id },
+        { secret: 'Fw3r3ew', expiresIn: 60 },
+      ),
+      refresh_token: await this.jwtService.signAsync(
+        { sub: user._id },
+        { secret: 'Fw3r3ewr4hsv34fd',expiresIn:'1y'},
+      ),
+    };
+
+    return credentials;
   }
 }

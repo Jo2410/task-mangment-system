@@ -1,6 +1,11 @@
-import { Body, Controller, Patch, Post, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
 import { AuthenticationService } from './auth.service';
-import { ConfirmEmailDto, LoginBodyDto, ResendConfirmEmailDto, SignupBodyDto } from './dto/auth.dto';
+import {
+  ConfirmEmailDto,
+  LoginBodyDto,
+  ResendConfirmEmailDto,
+  SignupBodyDto,
+} from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthenticationController {
@@ -15,7 +20,7 @@ export class AuthenticationController {
 
     await this.authenticationService.signup(body);
 
-    return { message: "Done" };
+    return { message: 'Done' };
   }
 
   @Post('resend-confirm-email')
@@ -25,7 +30,7 @@ export class AuthenticationController {
   ): Promise<{ message: string }> {
     await this.authenticationService.resendConfirmEmail(body);
 
-    return { message: "Done" };
+    return { message: 'Done' };
   }
 
   @Patch('confirm-email')
@@ -35,17 +40,19 @@ export class AuthenticationController {
   ): Promise<{ message: string }> {
     await this.authenticationService.confirmEmail(body);
 
-    return { message: "Done" };
+    return { message: 'Done' };
   }
 
-
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   async login(
     @Body()
     body: LoginBodyDto,
-  ) {
-    console.log(body);
-
-    return { message: 'Done' };
+  ): Promise<{
+    message: string;
+    data: { credentials: { access_token: string; refresh_token: string } };
+  }> {
+    const credentials = await this.authenticationService.login(body);
+    return { message: 'Done', data: { credentials } };
   }
 }
