@@ -1,6 +1,7 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { UserController } from "./user.controller";
 import { UserService } from "./user.service";
+import { setDefaultLanguage } from "../../common/middleware/setDefaultLanguage.middleware";
 
 
 @Module({
@@ -10,4 +11,8 @@ import { UserService } from "./user.service";
     providers:[UserService],
 })
 
-export class UserModule{}
+export class UserModule{
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(setDefaultLanguage).forRoutes('user')
+    }
+}
