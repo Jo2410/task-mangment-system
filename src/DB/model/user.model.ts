@@ -5,8 +5,13 @@ import {
   SchemaFactory,
   Virtual,
 } from '@nestjs/mongoose';
-import { GenderEnum, ProviderEnum } from '../../common/enum/user.enum';
-import { HydratedDocument } from 'mongoose';
+import {
+  GenderEnum,
+  PatientTrackEnum,
+  ProviderEnum,
+  RoleEnum,
+} from '../../common/enum/user.enum';
+import { HydratedDocument, Types } from 'mongoose';
 import { generateHash } from '../../common/utils/security/hash.security';
 import { OtpDocument } from './otp.model';
 
@@ -85,6 +90,57 @@ export class User {
     required: false,
   })
   changeCredentialsTime?: Date;
+
+  @Prop({
+    type: String,
+    enum: RoleEnum,
+    default: RoleEnum.patient,
+    required: false,
+  })
+  role?: RoleEnum;
+
+  @Prop({
+    type: String,
+    trim: true,
+    unique: true,
+    sparse: true,
+  })
+  phone?: string;
+
+  @Prop({
+    type: Number,
+    min: 0,
+    max: 120,
+  })
+  age?: number;
+
+  @Prop({
+    type: String,
+    trim: true,
+    maxlength: 500,
+  })
+  diagnosis?: string;
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'User',
+    index: true,
+    sparse: true,
+  })
+  therapistId?: Types.ObjectId;
+
+  @Prop({
+    type: String,
+    trim: true,
+    maxlength: 100,
+  })
+  specialization?: string;
+
+  @Prop({
+    type: String,
+    enum: PatientTrackEnum,
+  })
+  patientTrack?: PatientTrackEnum;
 
   @Virtual()
   otp!:OtpDocument[]
